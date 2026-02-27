@@ -1,6 +1,4 @@
 """
-config/settings/base.py
-
 Shared settings inherited by dev.py and prod.py.
 Nothing environment-specific lives here.
 """
