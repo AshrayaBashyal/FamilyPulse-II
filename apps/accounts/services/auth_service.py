@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.accounts.models import User
+from apps.accounts.models import User    # not used User = get_user_model() due to type hinting error
 
 
 def register_user(validated_data: dict) -> tuple[User, dict]:
