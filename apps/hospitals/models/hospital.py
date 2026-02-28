@@ -23,6 +23,9 @@ class Hospital(UUIDModel):
 
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING,)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+
     # Optional logo URL — actual file uploads later
     logo_url = models.URLField(blank=True, default="")
 

@@ -39,6 +39,9 @@ class HospitalMembership(UUIDModel):
         related_name="sent_invitations",
     )
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+    
     class Meta:
         db_table = "hospitals_membership"
         unique_together = [("user", "hospital")]
