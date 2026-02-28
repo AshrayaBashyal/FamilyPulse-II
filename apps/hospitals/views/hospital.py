@@ -117,3 +117,27 @@ class HospitalStatusView(APIView):
             hospital, serializer.validated_data["status"]
         )
         return Response(HospitalSerializer(hospital).data)
+    
+
+class MyHospitalsView(APIView):
+    """
+    Returns all hospitals the authenticated user is a member of,
+    regardless of status (pending, active, suspended).
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        responses={200: HospitalSerializer(many=True)},
+        summary="List hospitals I belong to (all statuses)",
+        tags=["Hospitals"],
+    )
+    def get(self, request):
+        hospital_ids = request.user.hospital_memberships.filter(
+            is_active=True,
+        ).values_list("hospital_id", flat=True)
+        # values_list(..., flat=True) returns a flat list of IDs instead of
+        # a list of dicts — more efficient when you only need one field.
+
+        hospitals = Hospital.objects.filter(id__in=hospital_ids)
+        return Response(HospitalSerializer(hospitals, many=True).data)
