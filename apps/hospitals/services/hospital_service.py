@@ -6,12 +6,21 @@ from apps.hospitals.models import Hospital, HospitalMembership
 User = get_user_model()
 
 
-def create_hospital(validated_data: dict) -> Hospital:
+def create_hospital(validated_data: dict, created_by) -> Hospital:
     """
     Creates a new hospital in PENDING status.
     Platform superadmin must approve it before it becomes ACTIVE.
     """
-    return Hospital.objects.create(**validated_data)
+    hospital = Hospital.objects.create(**validated_data)
+
+    HospitalMembership.objects.create(
+        user=created_by,
+        hospital=hospital,
+        role=HospitalMembership.Role.HOSPITAL_ADMIN,
+        invited_by=created_by,
+    )
+
+    return hospital
 
 
 def update_hospital_status(hospital: Hospital, new_status: str) -> Hospital:

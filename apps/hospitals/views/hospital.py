@@ -48,7 +48,8 @@ class HospitalListCreateView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        hospital = hospital_service.create_hospital(serializer.validated_data)
+        hospital = hospital_service.create_hospital(validated_data=serializer.validated_data, created_by=request.user)
+        
         return Response(HospitalSerializer(hospital).data, status=status.HTTP_201_CREATED)
 
 
