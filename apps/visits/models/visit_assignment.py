@@ -4,7 +4,7 @@ Tracks which nurse is assigned to a visit.
 
 from django.db import models
 from django.conf import settings
-from common.mixins import UUIDModel
+from common.models import UUIDModel
 from apps.visits.models.visit import Visit
 
 

@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from common.mixins import UUIDModel
+from common.models import UUIDModel
 from apps.hospitals.models import Hospital
 from apps.dependents.models import Dependent
 from apps.visits.models.visit_type import VisitType
