@@ -1,2 +1,2 @@
 from .dependent import Dependent
-from guardianship import Guardianship
+from .guardianship import Guardianship

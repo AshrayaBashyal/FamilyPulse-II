@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from common.mixins import UUIDModel
+from common.models import UUIDModel
 from apps.dependents.models.dependent import Dependent
 
 

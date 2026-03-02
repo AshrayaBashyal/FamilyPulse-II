@@ -1,5 +1,5 @@
 from django.db import models
-from common.mixins import UUIDModel
+from common.models import UUIDModel
 
 
 class Dependent(UUIDModel):
