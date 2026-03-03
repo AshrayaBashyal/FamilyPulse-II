@@ -77,6 +77,9 @@ class Visit(UUIDModel):
         help_text="Instructions or context from the guardian at booking time.",
     )
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+
     class Meta:
         db_table = "visits_visit"
         ordering = ["-created_at"]
