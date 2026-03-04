@@ -96,6 +96,7 @@ def start_visit(visit: Visit, nurse) -> Visit:
     assignment = VisitAssignment.objects.filter(
         visit=visit,
         nurse=nurse,
+        status=VisitAssignment.AssignmentStatus.ACCEPTED
     ).first()
     if not assignment:
         raise PermissionDenied("You are not the assigned nurse for this visit.")
@@ -107,6 +108,7 @@ def complete_visit(visit: Visit, nurse) -> Visit:
     assignment = VisitAssignment.objects.filter(
         visit=visit,
         nurse=nurse,
+        status=VisitAssignment.AssignmentStatus.ACCEPTED
     ).first()
     if not assignment:
         raise PermissionDenied("You are not the assigned nurse for this visit.")
