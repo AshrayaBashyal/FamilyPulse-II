@@ -138,3 +138,26 @@ def cancel_visit(visit: Visit, cancelled_by, reason: str = "") -> Visit:
     visit.save(update_fields=["cancelled_by", "cancellation_reason", "updated_at"])
 
     return transition(visit, Visit.Status.CANCELLED, cancelled_by)
+
+
+def reject_assignment(visit: Visit, nurse, reason: str = "") -> Visit:
+    """
+    Nurse rejects an assignment — updates the assignment record
+    and moves the visit back to SCHEDULED so admin can reassign.
+    """
+    assignment = VisitAssignment.objects.filter(
+        visit=visit,
+        nurse=nurse,
+        status=VisitAssignment.AssignmentStatus.PENDING,
+    ).first()
+
+    if not assignment:
+        raise PermissionDenied("You are not the assigned nurse for this visit.")
+
+    assignment.status = VisitAssignment.AssignmentStatus.REJECTED
+    assignment.rejection_reason = reason
+    assignment.rejected_at = timezone.now()
+    assignment.save(update_fields=["status", "rejection_reason", "rejected_at", "updated_at"])
+
+    # Move visit back to SCHEDULED — admin needs to assign someone else
+    return transition(visit, Visit.Status.SCHEDULED, nurse)
