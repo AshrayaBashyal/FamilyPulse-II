@@ -25,3 +25,13 @@ class RejectVisitSerializer(serializers.Serializer):
     """Used by medical admin when rejecting a submitted report."""
     reason = serializers.CharField(min_length=10)
     # Rejection requires a reason — min_length enforces a meaningful message.
+
+
+class RejectAssignmentSerializer(serializers.Serializer):
+    """Used by nurse when rejecting a visit assignment."""
+    reason = serializers.CharField(
+        required=False,
+        default="",
+        allow_blank=True,
+        help_text="Optional reason for rejecting the assignment.",
+    )    
