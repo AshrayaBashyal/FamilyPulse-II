@@ -153,3 +153,34 @@ class CancelVisitView(APIView):
             reason=serializer.validated_data.get("reason", ""),
         )
         return Response(VisitSerializer(visit).data)
+    
+
+class RejectAssignmentView(APIView):
+    """
+    Nurse rejects the assignment.
+    Visit moves back to SCHEDULED so admin can reassign.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        request={"application/json": {"type": "object", "properties": {"reason": {"type": "string"}}}},
+        responses={200: VisitSerializer},
+        summary="Reject a visit assignment (nurse)",
+        tags=["Visit Lifecycle"],
+    )
+    def post(self, request, visit_id):
+        visit = get_visit_or_404(visit_id)
+        if not visit:
+            return Response({"detail": "Visit not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        from apps.visits.serializers.scheduling import RejectAssignmentSerializer
+        serializer = RejectAssignmentSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        visit = visit_service.reject_assignment(
+            visit=visit,
+            nurse=request.user,
+            reason=serializer.validated_data.get("reason", ""),
+        )
+        return Response(VisitSerializer(visit).data)
