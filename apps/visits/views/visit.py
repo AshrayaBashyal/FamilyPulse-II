@@ -47,8 +47,7 @@ class VisitListCreateView(APIView):
         from django.db.models import Q
         visits = Visit.objects.filter(
             Q(dependent_id__in=dependent_ids) |               # as guardian
-            Q(assignments__nurse=user,
-              assignments__status="accepted") |                # as nurse
+            Q(assignments__nurse=user) |                      # as nurse (any assignment status — pending or accepted)|                # as nurse
             Q(hospital_id__in=hospital_ids_as_admin)          # as admin
         ).select_related(
             "dependent", "visit_type", "hospital", "requested_by"
