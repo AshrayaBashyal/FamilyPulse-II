@@ -38,9 +38,6 @@ class HospitalMembership(UUIDModel):
         blank=True,
         related_name="sent_invitations",
     )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
         db_table = "hospitals_membership"

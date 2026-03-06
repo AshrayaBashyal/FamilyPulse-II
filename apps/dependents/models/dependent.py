@@ -25,9 +25,6 @@ class Dependent(UUIDModel):
 
     emergency_notes = models.TextField(blank=True, default="", help_text="Critical info for emergencies — blood type, emergency contact, etc.")
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now_add=True)
-
     class Meta:
         db_table = "dependents_dependent"
         ordering = ["first_name", "last_name"]
