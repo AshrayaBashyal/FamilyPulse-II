@@ -27,7 +27,8 @@ TRANSITION_PERMISSIONS = {
     (Visit.Status.REQUESTED,        Visit.Status.SCHEDULED):        ["hospital_admin"],
     (Visit.Status.SCHEDULED,        Visit.Status.ASSIGNED):         ["hospital_admin"],
     (Visit.Status.ASSIGNED,         Visit.Status.ACCEPTED):         ["nurse"],
-    (Visit.Status.ASSIGNED,         Visit.Status.SCHEDULED):        ["hospital_admin", "nurse"],  # admin reassigns OR nurse rejects    (Visit.Status.ACCEPTED,         Visit.Status.STARTED):          ["nurse"],
+    (Visit.Status.ASSIGNED,         Visit.Status.SCHEDULED):        ["hospital_admin", "nurse"],  # admin reassigns OR nurse rejects    
+    (Visit.Status.ACCEPTED,         Visit.Status.STARTED):          ["nurse"],
     (Visit.Status.STARTED,          Visit.Status.COMPLETED):        ["nurse"],
     (Visit.Status.COMPLETED,        Visit.Status.REPORT_SUBMITTED): ["nurse"],
     (Visit.Status.REPORT_SUBMITTED, Visit.Status.APPROVED):         ["medical_admin"],
