@@ -1,5 +1,5 @@
 from django.urls import path
-from apps.visits.views.visit import VisitListCreateView, VisitDetailView, VisitTypeListCreateView
+from apps.visits.views.visit import VisitListCreateView, VisitDetailView, VisitTypeListCreateView, VisitAssignmentHistoryView
 from apps.visits.views.lifecycle import (
     ScheduleVisitView,
     AssignNurseView,
@@ -7,7 +7,7 @@ from apps.visits.views.lifecycle import (
     StartVisitView,
     CompleteVisitView,
     CancelVisitView,
-    RejectAssignmentView
+    RejectAssignmentView,
 )
 
 urlpatterns = [
