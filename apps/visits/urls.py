@@ -17,6 +17,8 @@ urlpatterns = [
     # Visits
     path("", VisitListCreateView.as_view(), name="visit-list-create"),
     path("<uuid:visit_id>/", VisitDetailView.as_view(), name="visit-detail"),
+    path("<uuid:visit_id>/assignments/", VisitAssignmentHistoryView.as_view(), name="visit-assignments"),
+
 
     # Lifecycle transitions 
     path("<uuid:visit_id>/schedule/", ScheduleVisitView.as_view(), name="visit-schedule"),

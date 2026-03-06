@@ -163,8 +163,6 @@ class VisitTypeListCreateView(APIView):
     
 class VisitAssignmentHistoryView(APIView):
     """
-    GET /api/v1/visits/<visit_id>/assignments/
-
     Returns the full assignment history for a visit.
     Shows every nurse who was ever assigned, their status, and timestamps.
 
