@@ -14,6 +14,15 @@ class VisitTypeSerializer(serializers.ModelSerializer):
         read_only_fields = ["id"]
 
 
+class AssignedNurseSerializer(serializers.Serializer):
+    """Lightweight nurse info embedded in VisitSerializer."""
+    assignment_id = serializers.UUIDField(source="id")
+    nurse_id = serializers.UUIDField(source="nurse.id")
+    nurse_name = serializers.CharField(source="nurse.full_name")
+    nurse_email = serializers.EmailField(source="nurse.email")
+    assignment_status = serializers.CharField(source="status")
+
+
 class VisitSerializer(serializers.ModelSerializer):
     """Full visit detail."""
 
@@ -21,6 +30,7 @@ class VisitSerializer(serializers.ModelSerializer):
     visit_type_name = serializers.CharField(source="visit_type.name", read_only=True)
     hospital_name = serializers.CharField(source="hospital.name", read_only=True)
     requested_by_email = serializers.EmailField(source="requested_by.email", read_only=True)
+    assigned_nurse = serializers.SerializerMethodField()
 
     class Meta:
         model = Visit
@@ -34,6 +44,7 @@ class VisitSerializer(serializers.ModelSerializer):
             "visit_type_name",
             "requested_by",
             "requested_by_email",
+            "assigned_nurse",
             "address",
             "latitude",
             "longitude",
@@ -48,6 +59,18 @@ class VisitSerializer(serializers.ModelSerializer):
             "id", "requested_by", "status",
             "created_at", "updated_at",
         ]
+
+    def get_assigned_nurse(self, visit):
+        assignment = visit.assignments.filter(
+            status__in=[
+                VisitAssignment.AssignmentStatus.PENDING,
+                VisitAssignment.AssignmentStatus.ACCEPTED,
+            ]
+        ).select_related("nurse").first()
+
+        if not assignment:
+            return None
+        return AssignedNurseSerializer(assignment).data        
 
 
 class CreateVisitSerializer(serializers.ModelSerializer):
