@@ -158,3 +158,50 @@ class VisitTypeListCreateView(APIView):
 
         visit_type = serializer.save()
         return Response(VisitTypeSerializer(visit_type).data, status=status.HTTP_201_CREATED)
+    
+
+    
+class VisitAssignmentHistoryView(APIView):
+    """
+    GET /api/v1/visits/<visit_id>/assignments/
+
+    Returns the full assignment history for a visit.
+    Shows every nurse who was ever assigned, their status, and timestamps.
+
+    Useful for:
+    - Guardian: seeing who is/was assigned to their dependent's visit
+    - Admin: auditing assignment history
+    - Medical admin: context when reviewing reports
+    """
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        responses={200: "VisitAssignmentSerializer(many=True)"},
+        summary="List assignment history for a visit",
+        tags=["Visits"],
+    )
+    def get(self, request, visit_id):
+        from apps.visits.serializers.visit import VisitAssignmentSerializer
+        from apps.visits.models import VisitAssignment
+
+        try:
+            visit = Visit.objects.select_related("hospital", "dependent").get(id=visit_id)
+        except Visit.DoesNotExist:
+            return Response({"detail": "Visit not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Same access check as VisitDetailView
+        is_member = HospitalMembership.objects.filter(
+            user=request.user, hospital=visit.hospital, is_active=True
+        ).exists()
+        is_guardian = Guardianship.objects.filter(
+            user=request.user, dependent=visit.dependent, is_active=True
+        ).exists()
+
+        if not is_member and not is_guardian:
+            return Response({"detail": "Visit not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        assignments = VisitAssignment.objects.filter(
+            visit=visit
+        ).select_related("nurse", "assigned_by").order_by("-created_at")
+
+        return Response(VisitAssignmentSerializer(assignments, many=True).data)
