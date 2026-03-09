@@ -8,7 +8,6 @@ class VisitTypeSerializer(serializers.ModelSerializer):
         fields = [
             "id", "hospital", "name", "description",
             "duration_minutes", "price",
-            "requires_vitals", "requires_attachments",
             "is_active",
         ]
         read_only_fields = ["id"]
