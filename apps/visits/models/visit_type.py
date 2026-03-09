@@ -2,7 +2,7 @@
 VisitType is defined by each hospital.
 Examples: General Checkup, Sample Collection, Dressing Change, Post-Surgery Check.
 - Different hospitals offer different services.
-- Each type can have custom required vitals, attachments, duration, and pricing.
+- Each type has custom duration, pricing, and a ReportTemplate that defines what the nurse must document.
 - Hospital admins manage their own types — platform doesn't dictate them.
 """
 
@@ -27,10 +27,6 @@ class VisitType(UUIDModel):
     duration_minutes = models.PositiveIntegerField(default=30, help_text="Estimated visit duration in minutes.",)
 
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00,)
-
-    # What this visit type require?
-    requires_vitals = models.BooleanField(default=False)
-    requires_attachments = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)
 
