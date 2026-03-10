@@ -161,3 +161,8 @@ def reject_assignment(visit: Visit, nurse, reason: str = "") -> Visit:
 
     # Move visit back to SCHEDULED — admin needs to assign someone else
     return transition(visit, Visit.Status.SCHEDULED, nurse)
+
+
+def mark_report_submitted(visit: Visit, nurse) -> Visit:
+    """Nurse submits report — COMPLETED → REPORT_SUBMITTED."""
+    return transition(visit, Visit.Status.REPORT_SUBMITTED, nurse)
