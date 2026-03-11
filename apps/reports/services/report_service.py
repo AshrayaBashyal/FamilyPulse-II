@@ -62,3 +62,72 @@ def _validate_field_value(field, value: str):
             return f"{field.label} must be a valid URL (upload the file first)."
 
     return None
+
+
+def _validate_and_save_sections(report: Report, sections_input: list) -> None:
+    """
+    Validates section input against the visit type's template.
+    Checks:
+      - No duplicate, unknown field IDs sent by client 
+      - All required fields are present and non-empty
+      - All values match their field type
+    Then creates/updates ReportSection rows.
+    """
+    try:
+        template = report.visit.visit_type.report_template
+    except Exception:
+        raise ValidationError(
+            "This visit type has no report template defined. "
+            "Ask the hospital admin to set one up first."
+        )
+
+    template_fields = {str(f.id): f for f in template.fields.all()}
+
+    # Detect duplicate field IDs in input before building the map
+    seen_field_ids = []
+    duplicates = []
+    for s in sections_input:
+        fid = str(s["field_id"])
+        if fid in seen_field_ids:
+            duplicates.append(fid)
+        seen_field_ids.append(fid)
+
+    if duplicates:
+        raise ValidationError(
+            {"sections": f"Duplicate field IDs submitted: {', '.join(set(duplicates))}."}
+        )
+
+    input_map = {str(s["field_id"]): s["value"] for s in sections_input}
+
+    # Reject unknown field IDs
+    unknown = [fid for fid in input_map if fid not in template_fields]
+    if unknown:
+        raise ValidationError(
+            {"sections": f"Unknown field IDs not in this template: {', '.join(unknown)}."}
+        )
+
+    # Validate required fields and type correctness
+    errors = {}
+    for field_id, field in template_fields.items():
+        value = input_map.get(field_id, "").strip()
+
+        if field.required and not value:
+            errors[field.name] = f"{field.label} is required."
+            continue
+
+        if value:
+            type_error = _validate_field_value(field, value)
+            if type_error:
+                errors[field.name] = type_error
+
+    if errors:
+        raise ValidationError(errors)
+
+    # Save sections
+    for field_id, field in template_fields.items():
+        value = input_map.get(field_id, "")
+        ReportSection.objects.update_or_create(
+            report=report,
+            field=field,
+            defaults={"value": value},
+        )    
