@@ -160,3 +160,14 @@ def create_report(visit_id: str, sections_input: list, nurse) -> Report:
 
     _validate_and_save_sections(report, sections_input)
     return report        
+
+
+def update_report(report: Report, sections_input: list) -> Report:
+    if report.is_locked:
+        raise ValidationError("This report has been approved and cannot be edited.")
+    if report.status == Report.Status.SUBMITTED:
+        raise ValidationError("This report has been submitted. (??Withdraw it first to edit??).")
+
+    _validate_and_save_sections(report, sections_input)
+    report.save()
+    return report
