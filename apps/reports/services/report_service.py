@@ -212,3 +212,23 @@ def approve_report(report: Report, medical_admin, review_notes: str = "") -> Rep
     )
     return report
      
+
+def reject_report(report: Report, medical_admin, review_notes: str) -> Report:
+    if report.status != Report.Status.SUBMITTED:
+        raise ValidationError("Only submitted reports can be rejected.")
+ 
+    _snapshot_version(
+        report, ReportVersion.Action.REJECTED,
+        triggered_by=medical_admin, notes=review_notes,
+    )
+ 
+    report.status = Report.Status.DRAFT
+    report.reviewed_by = medical_admin
+    report.reviewed_at = timezone.now()
+    report.review_notes = review_notes
+    report.version += 1
+    report.save(update_fields=[
+        "status", "reviewed_by", "reviewed_at",
+        "review_notes", "version", "updated_at",
+    ])
+    return report     
