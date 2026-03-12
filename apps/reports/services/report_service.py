@@ -182,7 +182,13 @@ def submit_report(report: Report, nurse) -> Report:
 
     _snapshot_version(report, ReportVersion.Action.SUBMITTED, triggered_by=nurse)
 
-    if report.visit.status == Visit.Status.COMPLETED:
+    if report.visit.status == Visit.Status.COMPLETED:  # future: is the condition even needed
         mark_report_submitted(report.visit, nurse)
 
     return report    
+
+
+def delete_report(report: Report) -> None:
+    if report.status != Report.Status.DRAFT:
+        raise ValidationError("Only draft reports can be deleted.")
+    report.delete()
