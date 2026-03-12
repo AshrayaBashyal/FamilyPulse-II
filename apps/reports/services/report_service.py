@@ -192,3 +192,23 @@ def delete_report(report: Report) -> None:
     if report.status != Report.Status.DRAFT:
         raise ValidationError("Only draft reports can be deleted.")
     report.delete()
+
+
+def approve_report(report: Report, medical_admin, review_notes: str = "") -> Report:
+    if report.status != Report.Status.SUBMITTED:
+        raise ValidationError("Only submitted reports can be approved.")
+ 
+    report.status = Report.Status.APPROVED
+    report.reviewed_by = medical_admin
+    report.reviewed_at = timezone.now()
+    report.review_notes = review_notes
+    report.save(update_fields=[
+        "status", "reviewed_by", "reviewed_at", "review_notes", "updated_at"
+    ])
+ 
+    _snapshot_version(
+        report, ReportVersion.Action.APPROVED,
+        triggered_by=medical_admin, notes=review_notes,
+    )
+    return report
+     
