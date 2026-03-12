@@ -131,3 +131,32 @@ def _validate_and_save_sections(report: Report, sections_input: list) -> None:
             field=field,
             defaults={"value": value},
         )    
+
+
+def create_report(visit_id: str, sections_input: list, nurse) -> Report:
+    try:
+        visit = Visit.objects.select_related(
+            "visit_type__report_template"
+        ).get(id=visit_id)
+    except Visit.DoesNotExist:
+        raise ValidationError("Visit not found.")
+
+    if visit.status not in [Visit.Status.COMPLETED, Visit.Status.REPORT_SUBMITTED]:
+        raise ValidationError("Reports can only be created for completed visits.")
+
+    is_assigned = VisitAssignment.objects.filter(
+        visit=visit,
+        nurse=nurse,
+        status=VisitAssignment.AssignmentStatus.ACCEPTED,
+    ).exists()
+    if not is_assigned:
+        raise PermissionDenied("You are not the accepted nurse for this visit.")
+
+    report = Report.objects.create(
+        visit=visit,
+        nurse=nurse,
+        status=Report.Status.DRAFT,
+    )
+
+    _validate_and_save_sections(report, sections_input)
+    return report        
