@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from apps.reports.models import Report, ReportSection, ReportTemplate, ReportVersion, TemplateField, Rep
 from apps.visits.models import Visit, VisitAssignment
-# from apps.visits.services.visit_service import mark_report_submitted
+from apps.visits.services.visit_service import mark_report_submitted
 
 
 def _build_sections_snapshot(report: Report) -> list:
@@ -171,3 +171,18 @@ def update_report(report: Report, sections_input: list) -> Report:
     _validate_and_save_sections(report, sections_input)
     report.save()
     return report
+
+
+def submit_report(report: Report, nurse) -> Report:
+    if report.status != Report.Status.DRAFT:
+        raise ValidationError("Only draft reports can be submitted.")
+
+    report.status = Report.Status.SUBMITTED
+    report.save(update_fields=["status", "updated_at"])
+
+    _snapshot_version(report, ReportVersion.Action.SUBMITTED, triggered_by=nurse)
+
+    if report.visit.status == Visit.Status.COMPLETED:
+        mark_report_submitted(report.visit, nurse)
+
+    return report    
