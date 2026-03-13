@@ -162,7 +162,7 @@ class ReportDetailView(APIView):
         summary="Delete a draft report (nurse)",
         tags=["Reports"]
     )
-    def delete(self, requests, report_id):
+    def delete(self, request, report_id):
         report = get_report_or_404(report_id)
         if not report or not can_access_report(request.user, report):
             return Response({"detail": "Report not found."}, status=status.HTTP_404_NOT_FOUND)
