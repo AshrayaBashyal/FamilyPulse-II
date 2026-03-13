@@ -171,3 +171,20 @@ class ReportDetailView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class ReportSubmitView(APIView):
+    permission_classes = [IsAuthenticated]
+ 
+    @extend_schema(
+        responses={200: ReportSerializer}, 
+        summary="Submit report for review (nurse)", 
+        tags=["Reports"]
+    )
+    def post(self, request, report_id):
+        report = get_report_or_404(report_id)
+        if not report:
+            return Response({"detail": "Report not found."}, status=status.HTTP_404_NOT_FOUND)
+        if report.nurse != request.user:
+            return Response({"detail": "Only the nurse who created this report can submit it."}, status=status.HTTP_403_FORBIDDEN)
+ 
+        report = report_service.submit_report(report, nurse=request.user)
+        return Response(ReportSerializer(report).data)
