@@ -120,3 +120,54 @@ class ReportListCreateView(APIView):
         return Response(ReportSerializer(report).data, status=status.HTTP_201_CREATED)
  
 
+class ReportDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        responses={200: ReportSerializer},
+        summary="Get report detail",
+        tags=["Reports"]
+    )
+    def get(self, request, report_id):
+        report = get_report_or_404(report_id)
+        if not report or not can_access_report(request.user, report):
+            return Response({"detail": "Report not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(ReportSerializer(report).data)
+    
+
+    @extend_schema(
+        request=UpdateReportSerializer,
+        responses={200: ReportSerializer}, 
+        summary="Update a draft report (nurse)", 
+        tags=["Reports"]
+    )
+    def patch(self, request, report_id):
+        report = get_report_or_404(report_id)
+        if not report or not can_access_report(request.user, report):
+            return Response({"detail": "Report not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # if report.nurse != request.user:     NOT NEEDED  can_access_report CAN HANDLE THIS
+        #     return Response({"detail": "Only the nurse who created this report can edit it."}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = UpdateReportSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        report = report_service.update_report(report, serializer.validated_data["sections"])    
+        return Response(ReportSerializer(report).data)
+
+
+    @extend_schema(
+        responses={204: OpenApiResponse(description="Deleted")},
+        summary="Delete a draft report (nurse)",
+        tags=["Reports"]
+    )
+    def delete(self, requests, report_id):
+        report = get_report_or_404(report_id)
+        if not report or not can_access_report(request.user, report):
+            return Response({"detail": "Report not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        report_service.delete_report(report)            
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
