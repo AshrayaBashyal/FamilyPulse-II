@@ -4,7 +4,7 @@ from apps.reports.models import Report, ReportVersion, ReportTemplate, TemplateF
 
 class TemplateFieldSerializer(serializers.ModelSerializer):
     choices = serializers.ListField(
-        child = serializers.CharField,
+        child = serializers.CharField(),
         required = False,
         default = list,
     )

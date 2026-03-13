@@ -2,7 +2,7 @@ import re
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError, PermissionDenied
 
-from apps.reports.models import Report, ReportSection, ReportTemplate, ReportVersion, TemplateField, Rep
+from apps.reports.models import Report, ReportSection, ReportTemplate, ReportVersion, TemplateField
 from apps.visits.models import Visit, VisitAssignment
 from apps.visits.services.visit_service import mark_report_submitted
 
