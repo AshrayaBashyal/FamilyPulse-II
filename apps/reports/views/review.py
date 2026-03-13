@@ -11,6 +11,10 @@ from apps.hospitals.models import HospitalMembership
 
 
 class ReportReviewView(APIView):
+    """
+    Medical admin either approves or rejects with a single endpoint.
+    Action is determined by the "action" field in the request body.
+    """
     permission_classes = [IsAuthenticated]
 
     def get_report(self, report_id):
