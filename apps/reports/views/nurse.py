@@ -52,3 +52,71 @@ def can_access_report(user, report) -> bool:
         return True
 
     return False
+
+
+class ReportListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        responses={200: ReportSerializer(many=True)},
+        summary="List reports for a visit",
+        tags=["Reports"],
+    )
+    def get(self, request):
+        visit_id = request.query_params.get("visit")
+        if not visit_id:
+            return Response(
+                {"detail": "visit query param is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        reports = Report.objects.filter(visit_id=visit_id).select_related(
+            "nurse", "reviewed_by", "visit__hospital", "visit__dependent"
+        ).prefetch_related("sections__field", "versions")
+
+        accessible = [r for r in reports if can_access_report(request.user, r)]
+        return Response(ReportSerializer(accessible, many=True).data)
+ 
+
+    #Better Version:
+    # from django.db.models import Q
+
+    # def get(self, request):
+    #     visit_id = request.query_params.get("visit")
+    #     user = request.user
+        
+    #     # 1. Define the filters for accessibility
+    #     # (Matches your logic in can_access_report)
+    #     accessible_filter = Q(nurse=user) | \
+    #                         Q(visit__hospital__memberships__user=user, 
+    #                         visit__hospital__memberships__is_active=True) | \
+    #                         Q(visit__dependent__guardianships__user=user, 
+    #                         visit__dependent__guardianships__is_active=True)
+
+    #     # 2. Combine with the visit_id filter
+    #     reports = Report.objects.filter(
+    #         Q(visit_id=visit_id) & accessible_filter
+    #     ).distinct().select_related(
+    #         "nurse", "reviewed_by", "visit__hospital", "visit__dependent"
+    #     ).prefetch_related("sections__field", "versions")
+
+    #     return Response(ReportSerializer(reports, many=True).data)
+
+    @extend_schema(
+        request=CreateReportSerializer,
+        responses={201: ReportSerializer},
+        summary="Create a report (nurse)",
+        tags=["Reports"],
+    )
+    def post(self, request):
+        serializer = CreateReportSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+ 
+        report = report_service.create_report(
+            visit_id=serializer.validated_data["visit"],
+            sections_input=serializer.validated_data["sections"],
+            nurse=request.user,
+        )
+        return Response(ReportSerializer(report).data, status=status.HTTP_201_CREATED)
+ 
+
