@@ -15,15 +15,25 @@ def _build_sections_snapshot(report: Report) -> list:
             "label": section.field.label,
             "field_type": section.field.field_type,
             "value": section.value,
+            # "required" : ...
         }
         for section in report.sections.select_related("field").all()
     ]
 
 
 def _snapshot_version(report: Report, action: str, triggered_by, notes: str = "") -> ReportVersion:
+    latest = (
+        ReportVersion.objects
+        .filter(report=report)
+        .order_by("-version_number")
+        .first()
+    )
+
+    next_version = 1 if not latest else latest.version_number + 1
+
     return ReportVersion.objects.create(
         report=report,
-        version_number=report.version,
+        version_number=next_version,
         sections_snapshot=_build_sections_snapshot(report),
         action=action,
         triggered_by=triggered_by,
@@ -197,7 +207,7 @@ def delete_report(report: Report) -> None:
 def approve_report(report: Report, medical_admin, review_notes: str = "") -> Report:
     if report.status != Report.Status.SUBMITTED:
         raise ValidationError("Only submitted reports can be approved.")
- 
+
     report.status = Report.Status.APPROVED
     report.reviewed_by = medical_admin
     report.reviewed_at = timezone.now()
@@ -226,7 +236,6 @@ def reject_report(report: Report, medical_admin, review_notes: str) -> Report:
     report.reviewed_by = medical_admin
     report.reviewed_at = timezone.now()
     report.review_notes = review_notes
-    report.version += 1
     report.save(update_fields=[
         "status", "reviewed_by", "reviewed_at",
         "review_notes", "version", "updated_at",
