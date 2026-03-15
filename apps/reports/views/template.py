@@ -89,3 +89,32 @@ class TemplateFieldListCreateView(APIView):
  
         field = TemplateField.objects.create(template=template, **serializer.validated_data)
         return Response(TemplateFieldSerializer(field).data, status=status.HTTP_201_CREATED)        
+
+
+ 
+class TemplateFieldDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+ 
+    @extend_schema(
+        responses={204: None},
+        summary="Remove a field from a template (hospital admin)",
+        tags=["Report Templates"],
+    )
+    def delete(self, request, template_id, field_id):
+        try:
+            template = ReportTemplate.objects.select_related("visit_type__hospital").get(id=template_id)
+            field = TemplateField.objects.get(id=field_id, template=template)
+        except (ReportTemplate.DoesNotExist, TemplateField.DoesNotExist):
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+ 
+        if not is_hospital_admin_of_visit_type(request.user, template.visit_type):
+            return Response({"detail": "Only hospital admins can edit templates."}, status=status.HTTP_403_FORBIDDEN)
+ 
+        if field.sections.exists():
+            return Response(
+                {"detail": "This field has been used in existing reports and cannot be deleted."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+ 
+        field.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)        
