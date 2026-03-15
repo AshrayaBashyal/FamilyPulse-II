@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
 from apps.reports.models import ReportTemplate, TemplateField
 from apps.reports.serializers.report import ReportTemplateSerializer, CreateReportTemplateSerializer, TemplateFieldSerializer
@@ -23,6 +23,14 @@ class ReportTemplateView(APIView):
     permission_classes=[IsAuthenticated]    
     
     @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="visit_type",
+                description="The ID of the visit type to fetch the template for",
+                required=True,
+                type=OpenApiTypes.UUID, # or OpenApiTypes.STR if it's not a UUID
+            ),
+        ],
         responses={200: ReportTemplateSerializer},
         summary="Get report template for a visit type",
         tags=["Report Templates"],
