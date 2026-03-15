@@ -17,3 +17,50 @@ def is_hospital_admin_of_visit_type(user, visit_type) -> bool:
         role=HospitalMembership.Role.HOSPITAL_ADMIN,
         is_active=True,
     ).exists()
+
+
+class ReportTemplateView(APIView):
+    permission_classes=[IsAuthenticated]    
+    
+    @extend_schema(
+        responses={200: ReportTemplateSerializer},
+        summary="Get report template for a visit type",
+        tags=["Report Templates"],
+    )
+    def get(self, request):
+        visit_type_id = request.query_params.get("visit_type")
+        if not visit_type_id:
+            return Response({"detail":"visit_type query param required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            template = ReportTemplate.objects.prefetch_related("fields").get(visit_type_id=visit_type_id)
+        except ReportTemplate.DoesNotExist:
+            return Response({"detail": "No template found for this visit type."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(ReportTemplateSerializer(template).data)
+
+
+    @extend_schema(
+        request=ReportTemplateSerializer,
+        responses={200: ReportTemplateSerializer},
+        summary="Create a report template for a visit type (hospital admin)",
+        tags=["Report Templates"],
+    )
+    def post(self, request):
+        serializer = CreateReportTemplateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+ 
+        visit_type = serializer.validated_data["visit_type"]
+ 
+        if not is_hospital_admin_of_visit_type(request.user, visit_type):
+            return Response({"detail": "Only hospital admins can create report templates."}, status=status.HTTP_403_FORBIDDEN)
+ 
+        if ReportTemplate.objects.filter(visit_type=visit_type).exists():
+            return Response({"detail": "A template already exists for this visit type."}, status=status.HTTP_400_BAD_REQUEST)
+ 
+        template = ReportTemplate.objects.create(
+            visit_type=visit_type,
+            description=serializer.validated_data.get("description", ""),
+        )
+        return Response(ReportTemplateSerializer(template).data, status=status.HTTP_201_CREATED)        
+        
