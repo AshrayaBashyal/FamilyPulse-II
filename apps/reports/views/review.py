@@ -25,7 +25,7 @@ class ReportReviewView(APIView):
         except Report.DoesNotExist:
             return None
 
-    extend_schema(
+    @extend_schema(
         request=ReviewReportSerializer,
         responses={200: ReportSerializer},
         summary="Approve or reject a report (medical admin)",
