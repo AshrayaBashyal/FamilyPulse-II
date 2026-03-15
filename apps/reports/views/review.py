@@ -54,9 +54,9 @@ class ReportReviewView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         action = serializer.validated_data["action"]
-        review_notes = serializer.validated_data["review_notes", ""]
+        review_notes = serializer.validated_data.get("review_notes", "")
 
-        if action == "accept":
+        if action == "approve":
             report = report_service.approve_report(
                 report=report,
                 medical_admin=request.user,
