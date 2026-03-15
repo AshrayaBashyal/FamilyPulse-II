@@ -63,4 +63,29 @@ class ReportTemplateView(APIView):
             description=serializer.validated_data.get("description", ""),
         )
         return Response(ReportTemplateSerializer(template).data, status=status.HTTP_201_CREATED)        
-        
+
+
+class TemplateFieldListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+ 
+    @extend_schema(
+        request=TemplateFieldSerializer,
+        responses={201: TemplateFieldSerializer},
+        summary="Add a field to a report template (hospital admin)",
+        tags=["Report Templates"],
+    )
+    def post(self, request, template_id):
+        try:
+            template = ReportTemplate.objects.select_related("visit_type__hospital").get(id=template_id)
+        except ReportTemplate.DoesNotExist:
+            return Response({"detail": "Template not found."}, status=status.HTTP_404_NOT_FOUND)
+ 
+        if not is_hospital_admin_of_visit_type(request.user, template.visit_type):
+            return Response({"detail": "Only hospital admins can edit templates."}, status=status.HTTP_403_FORBIDDEN)
+ 
+        serializer = TemplateFieldSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+ 
+        field = TemplateField.objects.create(template=template, **serializer.validated_data)
+        return Response(TemplateFieldSerializer(field).data, status=status.HTTP_201_CREATED)        
