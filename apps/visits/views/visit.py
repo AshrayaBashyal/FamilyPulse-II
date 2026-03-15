@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from drf_spectacular.utils import extend_schema, OpenApiResponse
+from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter, OpenApiTypes
 
 from apps.visits.models import Visit, VisitType
 from apps.visits.serializers.visit import VisitSerializer, CreateVisitSerializer, VisitTypeSerializer
@@ -117,6 +117,14 @@ class VisitTypeListCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="hospital",
+                description="The ID of the visit type to fetch the template for",
+                required=True,
+                type=OpenApiTypes.UUID, 
+            ),
+        ],    
         responses={200: VisitTypeSerializer(many=True)},
         summary="List visit types",
         tags=["Visit Types"],
