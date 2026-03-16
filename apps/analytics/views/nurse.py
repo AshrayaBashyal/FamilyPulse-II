@@ -15,7 +15,7 @@ from .utils import parse_date_params, parse_group_by
 class NurseVisitSummaryView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(summary="Nurse's own visit summary", tags=["Analytics"])
+    @extend_schema(summary="Nurse's own visit summary", tags=["Analytics-Nurse"])
     def get(self, request):
         date_from, date_to = parse_date_params(request)
         hospital_id = request.query_params.get("hospital")
@@ -42,7 +42,7 @@ class NurseVisitSummaryView(APIView):
 class NurseVisitsOverTimeView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(summary="Nurse's visits over time", tags=["Analytics"])
+    @extend_schema(summary="Nurse's visits over time", tags=["Analytics-Nurse"])
     def get(self, request):
         date_from, date_to = parse_date_params(request)
         group_by = parse_group_by(request, default="week")
@@ -55,7 +55,7 @@ class NurseVisitsOverTimeView(APIView):
 class NurseReportSummaryView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(summary="Nurse's own report summary", tags=["Analytics"])
+    @extend_schema(summary="Nurse's own report summary", tags=["Analytics-Nurse"])
     def get(self, request):
         date_from, date_to = parse_date_params(request)
         data = nurse_analytics.nurse_report_summary(

@@ -32,7 +32,7 @@ def get_dependent_for_guardian(user, dependent_id):
 class DependentVisitSummaryView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(summary="Dependent visit summary (guardian)", tags=["Analytics"])
+    @extend_schema(summary="Dependent visit summary (guardian)", tags=["Analytics-Guardian"])
     def get(self, request, dependent_id):
         dependent = get_dependent_for_guardian(request.user, dependent_id)
         if not dependent:
@@ -46,7 +46,7 @@ class DependentVisitSummaryView(APIView):
 class DependentHealthTrendsView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(summary="Dependent health trends (guardian)", tags=["Analytics"])
+    @extend_schema(summary="Dependent health trends (guardian)", tags=["Analytics-Guardian"])
     def get(self, request, dependent_id):
         dependent = get_dependent_for_guardian(request.user, dependent_id)
         if not dependent:
@@ -72,7 +72,7 @@ class DependentAvailableFieldsView(APIView):
 
     @extend_schema(
         summary="List available health trend fields for a dependent (guardian)",
-        tags=["Analytics"],
+        tags=["Analytics-Guardian"],
     )
     def get(self, request, dependent_id):
         dependent = get_dependent_for_guardian(request.user, dependent_id)

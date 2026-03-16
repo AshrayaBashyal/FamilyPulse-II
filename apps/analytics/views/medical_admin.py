@@ -15,7 +15,7 @@ from .utils import parse_date_params, require_hospital_role
 class MedicalAdminReviewSummaryView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(summary="Report review summary (medical admin)", tags=["Analytics"])
+    @extend_schema(summary="Report review summary (medical admin)", tags=["Analytics-Medicaladmin"])
     def get(self, request, hospital_id):
         hospital, error = require_hospital_role(
             request.user, hospital_id,

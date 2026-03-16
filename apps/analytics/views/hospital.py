@@ -15,7 +15,7 @@ from .utils import parse_date_params, parse_group_by, require_hospital_role
 class HospitalVisitSummaryView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(summary="Hospital visit summary (hospital admin)", tags=["Analytics"])
+    @extend_schema(summary="Hospital visit summary (hospital admin)", tags=["Analytics-Hospitaladmin"])
     def get(self, request, hospital_id):
         hospital, error = require_hospital_role(
             request.user, hospital_id,
@@ -32,7 +32,7 @@ class HospitalVisitSummaryView(APIView):
 class HospitalVisitsOverTimeView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(summary="Hospital visits over time (hospital admin)", tags=["Analytics"])
+    @extend_schema(summary="Hospital visits over time (hospital admin)", tags=["Analytics-Hospitaladmin"])
     def get(self, request, hospital_id):
         hospital, error = require_hospital_role(
             request.user, hospital_id,
@@ -50,7 +50,7 @@ class HospitalVisitsOverTimeView(APIView):
 class HospitalReportSummaryView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(summary="Hospital report summary (hospital/medical admin)", tags=["Analytics"])
+    @extend_schema(summary="Hospital report summary (hospital/medical admin)", tags=["Analytics-Hospitaladmin"])
     def get(self, request, hospital_id):
         hospital, error = require_hospital_role(
             request.user, hospital_id,
@@ -70,7 +70,7 @@ class HospitalReportSummaryView(APIView):
 class HospitalNurseSummaryView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(summary="Per-nurse breakdown (hospital admin)", tags=["Analytics"])
+    @extend_schema(summary="Per-nurse breakdown (hospital admin)", tags=["Analytics-Hospitaladmin"])
     def get(self, request, hospital_id):
         hospital, error = require_hospital_role(
             request.user, hospital_id,
