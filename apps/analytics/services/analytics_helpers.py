@@ -13,6 +13,10 @@ TODO (payments integration):
 - Add hospital_financial_summary() for hospital admin:
     revenue this month, per visit type breakdown, unpaid invoices.
 - Hook into Payment model once apps/payments is built.
+
+TODO : # Default to the last 30 days if no start date is given
+        -> if not date_from:
+            -> date_from = timezone.now() - timedelta(days=30)
 """
 
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
