@@ -13,7 +13,7 @@ from apps.analytics.services.analytics_helpers import date_filter, TRUNC_MAP, CO
 def hospital_visit_summary(hospital, date_from=None, date_to=None) -> dict:
     """Total visits broken down by status."""
     qs = Visit.objects.filter(hospital=hospital)
-    qs = _date_filter(qs, "created_at", date_from, date_to)
+    qs = date_filter(qs, "created_at", date_from, date_to)
  
     total = qs.count()
     by_status = (
@@ -27,4 +27,21 @@ def hospital_visit_summary(hospital, date_from=None, date_to=None) -> dict:
         "by_status": {row["status"]: row["count"] for row in by_status},
     }
  
+
+def hospital_report_summary(hospital, date_from=None, date_to=None) -> dict:
+    """Report approval/rejection rates for the hospital."""
+    qs = Report.objects.filter(visit__hospital=hospital)
+    qs = date_filter(qs, "created_at", date_from, date_to)
+ 
+    total = qs.count()
+    by_status = (
+        qs.values("status")
+        .annotate(count=Count("id"))
+        .order_by("status")
+    )
+ 
+    return {
+        "total": total,
+        "by_status": {row["status"]: row["count"] for row in by_status},
+    }
  
