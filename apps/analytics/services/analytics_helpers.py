@@ -15,12 +15,7 @@ TODO (payments integration):
 - Hook into Payment model once apps/payments is built.
 """
 
-from django.db.models import (
-    Count, Avg, Q, F, ExpressionWrapper,
-    DurationField,
-)
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
- 
 from apps.visits.models import Visit
  
  
