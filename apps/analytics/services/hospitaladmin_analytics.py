@@ -147,3 +147,25 @@ def hospital_nurse_summary(hospital, date_from=None, date_to=None) -> list:
  
     return result
  
+
+  
+def hospital_visits_over_time(hospital, date_from=None, date_to=None, group_by="day") -> list:
+    """
+    Visit counts grouped by day/week/month.
+     """
+    trunc_fn = TRUNC_MAP[group_by]
+ 
+    qs = Visit.objects.filter(hospital=hospital)
+    qs = date_filter(qs, "created_at", date_from, date_to)
+ 
+    rows = (
+        qs.annotate(period=trunc_fn("created_at"))
+        .values("period")
+        .annotate(count=Count("id"))
+        .order_by("period")
+    )
+ 
+    return [
+        {"period": str(row["period"]), "count": row["count"]}
+        for row in rows
+    ]
