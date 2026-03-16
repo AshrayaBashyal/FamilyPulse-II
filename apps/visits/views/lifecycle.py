@@ -11,6 +11,7 @@ from apps.visits.serializers.scheduling import (
     ScheduleVisitSerializer,
     AssignNurseSerializer,
     CancelVisitSerializer,
+    RejectAssignmentSerializer,
 )
 from apps.visits.services import visit_service
 
@@ -69,12 +70,7 @@ class AssignNurseView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         nurse = User.objects.get(id=serializer.validated_data["nurse_id"])
-
-        visit_service.assign_nurse(
-            visit=visit,
-            nurse=nurse,
-            assigned_by=request.user,
-        )
+        visit_service.assign_nurse(visit=visit, nurse=nurse, assigned_by=request.user)
         return Response(VisitSerializer(visit).data)
 
 
@@ -135,7 +131,7 @@ class CancelVisitView(APIView):
     @extend_schema(
         request=CancelVisitSerializer,
         responses={200: VisitSerializer},
-        summary="Cancel a visit",
+        summary="Cancel a visit (admin)",
         tags=["Visit Lifecycle"],
     )
     def post(self, request, visit_id):
@@ -153,7 +149,7 @@ class CancelVisitView(APIView):
             reason=serializer.validated_data.get("reason", ""),
         )
         return Response(VisitSerializer(visit).data)
-    
+
 
 class RejectAssignmentView(APIView):
     """
@@ -163,7 +159,7 @@ class RejectAssignmentView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        request={"application/json": {"type": "object", "properties": {"reason": {"type": "string"}}}},
+        request=RejectAssignmentSerializer,
         responses={200: VisitSerializer},
         summary="Reject a visit assignment (nurse)",
         tags=["Visit Lifecycle"],
@@ -173,7 +169,6 @@ class RejectAssignmentView(APIView):
         if not visit:
             return Response({"detail": "Visit not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        from apps.visits.serializers.scheduling import RejectAssignmentSerializer
         serializer = RejectAssignmentSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -181,6 +176,60 @@ class RejectAssignmentView(APIView):
         visit = visit_service.reject_assignment(
             visit=visit,
             nurse=request.user,
+            reason=serializer.validated_data.get("reason", ""),
+        )
+        return Response(VisitSerializer(visit).data)
+
+
+#  Guardian confirm scheduled time
+class ConfirmVisitView(APIView):
+    """
+    Guardian confirms the admin-scheduled time.
+    Works even if a nurse is already assigned (parallel flow).
+    """
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        responses={200: VisitSerializer},
+        summary="Confirm scheduled visit time (guardian)",
+        tags=["Visit Lifecycle"],
+    )
+    def post(self, request, visit_id):
+        visit = get_visit_or_404(visit_id)
+        if not visit:
+            return Response({"detail": "Visit not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        visit = visit_service.confirm_visit(visit=visit, guardian=request.user)
+        return Response(VisitSerializer(visit).data)
+
+
+# Guardian cancel due to unacceptable scheduled time
+class GuardianCancelView(APIView):
+    """
+    Guardian rejects the scheduled time — visit is cancelled.
+    Any existing nurse assignment is also cancelled.
+    Guardian should rebook with a different time or hospital.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        request=CancelVisitSerializer,
+        responses={200: VisitSerializer},
+        summary="Cancel visit due to unacceptable scheduled time (guardian)",
+        tags=["Visit Lifecycle"],
+    )
+    def post(self, request, visit_id):
+        visit = get_visit_or_404(visit_id)
+        if not visit:
+            return Response({"detail": "Visit not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = CancelVisitSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        visit = visit_service.cancel_by_guardian(
+            visit=visit,
+            guardian=request.user,
             reason=serializer.validated_data.get("reason", ""),
         )
         return Response(VisitSerializer(visit).data)
