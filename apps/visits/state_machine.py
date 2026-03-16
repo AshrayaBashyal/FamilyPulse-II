@@ -1,5 +1,10 @@
 """
 All visit status transition logic.
+CHANGES:
+- assign_nurse no longer requires guardian_response=CONFIRMED first.
+  Industry standard: admin assigns nurse in parallel while waiting for
+  guardian response. If guardian cancels, assignment is cancelled too.
+  See visit_service.cancel_by_guardian() for that logic.
 """
 
 from django.utils import timezone
