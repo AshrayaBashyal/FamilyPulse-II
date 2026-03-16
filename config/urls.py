@@ -13,6 +13,7 @@ urlpatterns = [
     path("api/v1/visits/", include("apps.visits.urls")),
     path("api/v1/reports/", include("apps.reports.urls")),
     path("api/v1/payments/", include("apps.payments.urls")),
+    path("api/v1/analytics/", include("apps.analytics.urls")),
 
 
     # API Docs (dev only — lock these down in prod)
