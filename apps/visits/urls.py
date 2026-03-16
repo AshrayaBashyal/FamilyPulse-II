@@ -13,7 +13,7 @@ from apps.visits.views.lifecycle import (
     StartVisitView,
     CompleteVisitView,
     CancelVisitView,
-    ConfirmVisitView    
+    ConfirmVisitView,      
     GuardianCancelView,    
 )
 
