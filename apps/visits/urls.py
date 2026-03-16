@@ -1,31 +1,36 @@
 from django.urls import path
-from apps.visits.views.visit import VisitListCreateView, VisitDetailView, VisitTypeListCreateView, VisitAssignmentHistoryView
+from apps.visits.views.visit import (
+    VisitListCreateView,
+    VisitDetailView,
+    VisitTypeListCreateView,
+    VisitAssignmentHistoryView,
+)
 from apps.visits.views.lifecycle import (
     ScheduleVisitView,
     AssignNurseView,
     AcceptVisitView,
+    RejectAssignmentView,
     StartVisitView,
     CompleteVisitView,
     CancelVisitView,
-    RejectAssignmentView,
+    ConfirmVisitView    
+    GuardianCancelView,    
 )
 
 urlpatterns = [
-    # Visit types
     path("types/", VisitTypeListCreateView.as_view(), name="visit-type-list-create"),
 
-    # Visits
-    path("", VisitListCreateView.as_view(), name="visit-list-create"),
-    path("<uuid:visit_id>/", VisitDetailView.as_view(), name="visit-detail"),
+    path("",                          VisitListCreateView.as_view(),         name="visit-list-create"),
+    path("<uuid:visit_id>/",          VisitDetailView.as_view(),             name="visit-detail"),
     path("<uuid:visit_id>/assignments/", VisitAssignmentHistoryView.as_view(), name="visit-assignments"),
 
-
-    # Lifecycle transitions 
-    path("<uuid:visit_id>/schedule/", ScheduleVisitView.as_view(), name="visit-schedule"),
-    path("<uuid:visit_id>/assign/", AssignNurseView.as_view(), name="visit-assign"),
-    path("<uuid:visit_id>/accept/", AcceptVisitView.as_view(), name="visit-accept"),
-    path("<uuid:visit_id>/reject/", RejectAssignmentView.as_view(), name="visit-reject"),
-    path("<uuid:visit_id>/start/", StartVisitView.as_view(), name="visit-start"),
-    path("<uuid:visit_id>/complete/", CompleteVisitView.as_view(), name="visit-complete"),
-    path("<uuid:visit_id>/cancel/", CancelVisitView.as_view(), name="visit-cancel"),
+    path("<uuid:visit_id>/schedule/",        ScheduleVisitView.as_view(),    name="visit-schedule"),
+    path("<uuid:visit_id>/assign/",          AssignNurseView.as_view(),      name="visit-assign"),
+    path("<uuid:visit_id>/accept/",          AcceptVisitView.as_view(),      name="visit-accept"),
+    path("<uuid:visit_id>/reject/",          RejectAssignmentView.as_view(), name="visit-reject"),
+    path("<uuid:visit_id>/start/",           StartVisitView.as_view(),       name="visit-start"),
+    path("<uuid:visit_id>/complete/",        CompleteVisitView.as_view(),    name="visit-complete"),
+    path("<uuid:visit_id>/cancel/",          CancelVisitView.as_view(),      name="visit-cancel"),
+    path("<uuid:visit_id>/confirm/",         ConfirmVisitView.as_view(),     name="visit-confirm"),         # NEW
+    path("<uuid:visit_id>/guardian-cancel/", GuardianCancelView.as_view(),   name="visit-guardian-cancel"), # NEW
 ]
