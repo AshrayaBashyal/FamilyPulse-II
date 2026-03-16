@@ -166,3 +166,14 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,    
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+# ---------------------------------------------------------------------------
+# Visit Confirmation
+# ---------------------------------------------------------------------------
+# Visit Scheduling Windows
+# ---------------------------------------------------------------------------
+ 
+VISIT_MIN_ADVANCE_HOURS = 48         # guardian must set preferred_at at least 48h from now
+VISIT_SCHEDULE_WITHIN_HOURS = 12     # admin must schedule within 12h of visit creation
+VISIT_CONFIRMATION_HOURS = 24        # guardian has up to 24h to confirm scheduled time
+VISIT_CONFIRMATION_BUFFER_HOURS = 24  # admin cannot schedule a visit less than 24h from now
