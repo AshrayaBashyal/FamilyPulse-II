@@ -1,11 +1,8 @@
 from django.db.models import (
-    Count, Avg, Q, F, ExpressionWrapper,
-    DurationField,
-)
+    Count, Q)
 
 from apps.visits.models import Visit, VisitAssignment
-from apps.reports.models import Report, ReportSection, ReportVersion
-from apps.hospitals.models import Hospital, HospitalMembership
+from apps.reports.models import Report
 
 from apps.analytics.services.analytics_helpers import date_filter, TRUNC_MAP, COMPLETED_STATUSES
 
