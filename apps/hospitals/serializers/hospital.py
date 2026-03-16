@@ -16,6 +16,8 @@ class HospitalSerializer(serializers.ModelSerializer):
             "address",
             "city",
             "country",
+            "latitude",
+            "longitude",
             "status",
             "logo_url",
             "created_at",
@@ -37,6 +39,8 @@ class HospitalCreateSerializer(serializers.ModelSerializer):
             "address",
             "city",
             "country",
+            "latitude",
+            "longitude",
         ]
 
     def validate_registration_number(self, value):
